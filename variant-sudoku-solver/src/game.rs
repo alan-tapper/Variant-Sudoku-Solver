@@ -4,7 +4,8 @@ pub mod status;
 
 pub struct Game {
   pub board: [[char; 9]; 9],
-  pub digits: [char; 9]
+  pub digits: [char; 9],
+  pub empty_digit: char
 }
 
 impl Game {
@@ -46,13 +47,17 @@ impl Game {
     s
   }
 
-  pub fn is_valid(&self) -> Status {
+  pub fn is_valid(&self, in_progress: bool) -> Status {
     let mut error_statuses: Vec<Status> = Vec::new();
     for i in 0..9 {
       for j in 0..9 {
         let mut v = false;
         for k in 0..9 {
           if self.board[i][j] == self.digits[k] {
+            v = true;
+            break;
+          }
+          if in_progress && self.board[i][j] == self.empty_digit {
             v = true;
           }
         }
@@ -87,7 +92,7 @@ impl Game {
     let mut error_statuses: Vec<Status> = Vec::new();
     for j1 in 0..9 {
       for j2 in 0..9 {
-        if j1 != j2 && self.board[i][j1] == self.board[i][j2] {
+        if j1 < j2 && self.board[i][j1] == self.board[i][j2] {
           let mut v: Vec<String> = Vec::new();
           v.push(format!("duplicate {}s in a row at ({}, {}), ({}, {})", self.board[i][j1], i, j1, i, j2).to_string());
           let s = Status(false, v);
@@ -110,7 +115,7 @@ impl Game {
     let mut error_statuses: Vec<Status> = Vec::new();
     for i1 in 0..9 {
       for i2 in 0..9 {
-        if i1 != i2 && self.board[i1][j] == self.board[i2][j] {
+        if i1 < i2 && self.board[i1][j] == self.board[i2][j] {
           let mut v: Vec<String> = Vec::new();
           v.push(format!("duplicate {}s in a row at ({}, {}), ({}, {})", self.board[i1][j], i1, j, i2, j).to_string());
           let s = Status(false, v);
