@@ -4,7 +4,7 @@ use csv::ReaderBuilder;
 use std::path::PathBuf;
 
 pub fn game_from_sample_board(board_type: &str, board_num : &str) -> Game {
-  let board = match read_board(board_type, board_num) {
+  let board = match read_game(board_type, board_num) {
     Ok(b) => b,
     Err(e) => {
       eprintln!("Failed to read board {} {}: {}", board_type, board_num, e);
@@ -17,7 +17,7 @@ pub fn game_from_sample_board(board_type: &str, board_num : &str) -> Game {
   }
 }
 
-fn read_board(board_type: &str, board_num: &str) -> Result<[[char;9];9], Box<dyn Error>> {
+fn read_game(board_type: &str, board_num: &str) -> Result<[[char;9];9], Box<dyn Error>> {
   let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
   path.push("src");
   path.push("sample_boards");
@@ -33,7 +33,7 @@ fn read_board(board_type: &str, board_num: &str) -> Result<[[char;9];9], Box<dyn
   let mut row_count: usize = 0;
 
   for (i, result) in rdr.records().enumerate() {
-      if i >= 9 { break; }
+      // if i >= 9 { break; }
       let record = result?;
       // eprintln!("record #{}: {:?}", i + 1, record);
 

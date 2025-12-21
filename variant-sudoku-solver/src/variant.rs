@@ -1,0 +1,5 @@
+pub enum Variant {
+  ANTIKNIGHT,
+  ANTIKING,
+  ANTIDIAGONAL
+}

@@ -18,4 +18,8 @@ impl Status {
     }
     return s;
   }
+
+  pub fn clone(&self) -> Status {
+    return Status(self.0, self.1.clone())
+  }
 }

@@ -1,6 +1,7 @@
-use status::Status;
-
 pub mod status;
+use status::Status;
+use regex::Regex;
+use ansi_term::Colour;
 
 pub struct Game {
   pub board: [[char; 9]; 9],
@@ -14,7 +15,9 @@ impl Game {
     if highlight_errors {
       println!("highlighting errors");
     }
-    let status = self.is_valid(in_progress);
+    let status: Status = self.get_status(in_progress);
+
+    let problematic_cells = self.get_problematic_cells(&status);
 
     let mut s: String = String::new();
     //top edge of board
@@ -39,7 +42,8 @@ impl Game {
       s.push('|');
       for j in 0..9 {
         if j == 3 || j == 6 {s.push('|')}
-        s.push(self.board[i][j]);
+        let is_problematic = problematic_cells.contains(&(i as usize, j as usize));
+        s.push_str(&(self.format_cell(self.board[i][j], is_problematic)));
         if j != 8 {s.push(' ')}
       };
       s.push('|');
@@ -57,29 +61,52 @@ impl Game {
     s.push('\n');
     
     s.push_str(&status.format(true));
-    if !in_progress && status.0 {
+    if !in_progress && status.clone().0 {
       s.push_str("\n");
       s.push_str("Puzzle Complete!");
     }
     return s
   }
 
-  pub fn is_valid(&self, in_progress: bool) -> Status {
+  fn get_problematic_cells(&self, status: &Status) -> Vec<(usize, usize)> {
+    let mut problematic_cells: Vec<(usize, usize)> = Vec::new();
+    let re = Regex::new(r"\((\d+),\s*(\d+)\)").unwrap();
+    for msg in &status.1 {
+      for cap in re.captures_iter(msg) {
+        if let (Some(i_str), Some(j_str)) = (cap.get(1), cap.get(2)) {
+          if let (Ok(i), Ok(j)) = (i_str.as_str().parse::<usize>(), j_str.as_str().parse::<usize>()) {
+            problematic_cells.push((i, j));
+          }
+        }
+      }
+    }
+    problematic_cells
+  }
+
+  fn format_cell(&self, val: char, is_problematic: bool) -> String {
+    if !is_problematic {
+      return val.to_string();
+    } else {
+      return Colour::Red.paint(val.to_string()).to_string();
+    }
+  }
+
+  pub fn get_status(&self, in_progress: bool) -> Status {
     let mut error_statuses: Vec<Status> = Vec::new();
     //check that each individual cell is valid and that all the rows are valid
     for i in 0..9 {
       for j in 0..9 {
-        let mut v = false;
+        let mut digit_is_valid = false;
         for k in 0..9 {
           if self.board[i][j] == Game::DIGITS[k] {
-            v = true;
+            digit_is_valid = true;
             break;
           }
           if in_progress && self.board[i][j] == Game::EMPTY_DIGIT {
-            v = true;
+            digit_is_valid = true;
           }
         }
-        if v == false {
+        if digit_is_valid == false {
           let mut vec: Vec<String> = Vec::new();
           vec.push(format!("invalid digit: {} at ({}, {})", self.board[i][j], i, j));
           error_statuses.push(Status(false, vec));
