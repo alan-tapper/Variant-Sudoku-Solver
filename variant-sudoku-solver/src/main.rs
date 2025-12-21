@@ -1,9 +1,9 @@
 mod game;
 use game::Game;
-
 use std::env;
 
 mod board_parser;
+mod variants;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
