@@ -1,31 +1,12 @@
-use game::Game;
-
 mod game;
+use game::Game;
 mod board_parser;
 
-fn setup_game() -> Game {
-  Game{
-    board: [
-      ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
-      ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
-      ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
-      ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
-      ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
-      ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
-      ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
-      ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
-      [' ', '2', '3', '4', '5', '6', '7', '8', '9'],
-    ],
-    digits: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
-    empty_digit: ' '
-  }
-}
-
 fn main() {
-    let game: Game = setup_game();
+    let game: Game = board_parser::game_from_sample_board("standard", "01");
     println!();
     println!("{}", game.format_game());
     println!();
     let game_status = game.is_valid(true);
-    println!("{}", game_status.format());
+    eprintln!("{}", game_status.format());
 }

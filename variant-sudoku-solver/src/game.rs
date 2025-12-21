@@ -4,11 +4,12 @@ pub mod status;
 
 pub struct Game {
   pub board: [[char; 9]; 9],
-  pub digits: [char; 9],
-  pub empty_digit: char
 }
 
 impl Game {
+  pub const DIGITS: [char; 9] = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  pub const EMPTY_DIGIT: char = ' ';
+
   pub fn format_game(&self) -> String {
     let mut s: String = String::new();
     s.push(' ');
@@ -49,15 +50,16 @@ impl Game {
 
   pub fn is_valid(&self, in_progress: bool) -> Status {
     let mut error_statuses: Vec<Status> = Vec::new();
+    //check that each individual cell is valid and that all the rows are valid
     for i in 0..9 {
       for j in 0..9 {
         let mut v = false;
         for k in 0..9 {
-          if self.board[i][j] == self.digits[k] {
+          if self.board[i][j] == Game::DIGITS[k] {
             v = true;
             break;
           }
-          if in_progress && self.board[i][j] == self.empty_digit {
+          if in_progress && self.board[i][j] == Game::EMPTY_DIGIT {
             v = true;
           }
         }
@@ -72,16 +74,33 @@ impl Game {
         error_statuses.push(row_status);
       }
     }
+    
+    //check that all the cols are valid
     for j in 0..9 {
       let col_status = self.check_col(j);
       if col_status.0 == false {
         error_statuses.push(col_status);
       }
     }
+    
+    //check that all the boxes are valid
+    for box_i in 0..3 {
+      for box_j in 0..3 {
+        let box_status = self.check_box(box_i, box_j);
+        if box_status.0 == false {
+          error_statuses.push(box_status);
+        }
+      }
+    }
+    return self.combine_statuses(error_statuses);
+  }
+
+  fn combine_statuses(&self, error_statuses: Vec<Status>) -> Status {
     if error_statuses.len() != 0 {
       let mut overall_error_status_messages: Vec<String> = Vec::new();
       for es in error_statuses {
         overall_error_status_messages.push(es.1.concat());
+        overall_error_status_messages.push("\n".to_string());
       }
       return Status(false, overall_error_status_messages);
     };
@@ -92,7 +111,7 @@ impl Game {
     let mut error_statuses: Vec<Status> = Vec::new();
     for j1 in 0..9 {
       for j2 in 0..9 {
-        if j1 < j2 && self.board[i][j1] == self.board[i][j2] {
+        if self.board[i][j1] != Game::EMPTY_DIGIT && j1 < j2 && self.board[i][j1] == self.board[i][j2] {
           let mut v: Vec<String> = Vec::new();
           v.push(format!("duplicate {}s in a row at ({}, {}), ({}, {})", self.board[i][j1], i, j1, i, j2).to_string());
           let s = Status(false, v);
@@ -100,22 +119,14 @@ impl Game {
         }
       }
     }
-    if error_statuses.len() != 0 {
-      let mut overall_error_status_messages: Vec<String> = Vec::new();
-      for es in error_statuses {
-        overall_error_status_messages.push(es.1.concat());
-        overall_error_status_messages.push("\n".to_string());
-      }
-      return Status(false, overall_error_status_messages);
-    };
-    return Status(true, Vec::new());
+    return self.combine_statuses(error_statuses);
   }
 
   fn check_col(&self, j: usize) -> Status {
     let mut error_statuses: Vec<Status> = Vec::new();
     for i1 in 0..9 {
       for i2 in 0..9 {
-        if i1 < i2 && self.board[i1][j] == self.board[i2][j] {
+        if self.board[i1][j] != Game::EMPTY_DIGIT && i1 < i2 && self.board[i1][j] == self.board[i2][j] {
           let mut v: Vec<String> = Vec::new();
           v.push(format!("duplicate {}s in a row at ({}, {}), ({}, {})", self.board[i1][j], i1, j, i2, j).to_string());
           let s = Status(false, v);
@@ -123,15 +134,25 @@ impl Game {
         }
       }
     }
-    if error_statuses.len() != 0 {
-      let mut overall_error_status_messages: Vec<String> = Vec::new();
-      for es in error_statuses {
-        overall_error_status_messages.push(es.1.concat());
-        overall_error_status_messages.push("\n".to_string());
-      }
-      return Status(false, overall_error_status_messages);
-    };
-    return Status(true, Vec::new());
+    return self.combine_statuses(error_statuses);
   }
 
+  fn check_box(&self, box_i: usize, box_j: usize) -> Status {
+    let mut error_statuses: Vec<Status> = Vec::new();
+    for i1 in (3 * box_i)..(3 * box_i + 3) {
+      for j1 in (3 * box_j)..(3 * box_j + 3) {
+        for i2 in (3 * box_i)..(3 * box_i + 3) {
+          for j2 in (3 * box_j)..(3 * box_j + 3) {
+            if self.board[i1][j1] != Game::EMPTY_DIGIT && (i1 + j1) < (i2 + j2) && self.board[i1][j1] == self.board[i2][j2] {
+              let mut v: Vec<String> = Vec::new();
+              v.push(format!("duplicate {}s in a box at ({}, {}), ({}, {})", self.board[i1][j1], i1, j1, i2, j2).to_string());
+              let s = Status(false, v);
+              error_statuses.push(s);
+            }
+          }
+        }
+      }
+    }
+    return self.combine_statuses(error_statuses);
+  }
 }
