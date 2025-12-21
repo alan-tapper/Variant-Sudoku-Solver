@@ -10,8 +10,14 @@ impl Game {
   pub const DIGITS: [char; 9] = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
   pub const EMPTY_DIGIT: char = ' ';
 
-  pub fn format_game(&self) -> String {
+  pub fn format_game_terminal(&self, in_progress: bool, highlight_errors: bool) -> String {
+    if highlight_errors {
+      println!("highlighting errors");
+    }
+    let status = self.is_valid(in_progress);
+
     let mut s: String = String::new();
+    //top edge of board
     s.push(' ');
     for j in 0..9 {
       if j == 3 || j == 6 {s.push(' ')}
@@ -19,6 +25,7 @@ impl Game {
       if j != 8 {s.push(' ')}
     };
     s.push('\n');
+    //main board
     for i in 0..9 {
       if i == 3 || i == 6 {
         s.push(' ');
@@ -40,12 +47,21 @@ impl Game {
     };
     s.push('\n');
     s.push(' ');
+    //bottom edge of board
     for j in 0..9 {
       if j == 3 || j == 6 {s.push(' ')}
       s.push('-');
       if j != 8 {s.push(' ')}
     };
-    s
+    s.push('\n');
+    s.push('\n');
+    
+    s.push_str(&status.format(true));
+    if !in_progress && status.0 {
+      s.push_str("\n");
+      s.push_str("Puzzle Complete!");
+    }
+    return s
   }
 
   pub fn is_valid(&self, in_progress: bool) -> Status {
@@ -99,8 +115,7 @@ impl Game {
     if error_statuses.len() != 0 {
       let mut overall_error_status_messages: Vec<String> = Vec::new();
       for es in error_statuses {
-        overall_error_status_messages.push(es.1.concat());
-        overall_error_status_messages.push("\n".to_string());
+        overall_error_status_messages.push(es.format(false));
       }
       return Status(false, overall_error_status_messages);
     };
@@ -128,7 +143,7 @@ impl Game {
       for i2 in 0..9 {
         if self.board[i1][j] != Game::EMPTY_DIGIT && i1 < i2 && self.board[i1][j] == self.board[i2][j] {
           let mut v: Vec<String> = Vec::new();
-          v.push(format!("duplicate {}s in a row at ({}, {}), ({}, {})", self.board[i1][j], i1, j, i2, j).to_string());
+          v.push(format!("duplicate {}s in a col at ({}, {}), ({}, {})", self.board[i1][j], i1, j, i2, j).to_string());
           let s = Status(false, v);
           error_statuses.push(s);
         }
