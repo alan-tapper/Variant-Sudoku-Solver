@@ -11,7 +11,7 @@ impl Game {
   pub const DIGITS: [char; 9] = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
   pub const EMPTY_DIGIT: char = ' ';
 
-  pub fn format_game_terminal(&self, in_progress: bool, highlight_errors: bool) -> String {
+  pub fn render_game_terminal(&self, in_progress: bool, highlight_errors: bool) -> String {
     if highlight_errors {
       println!("highlighting errors");
     }
@@ -80,7 +80,7 @@ impl Game {
         }
       }
     }
-    problematic_cells
+    return problematic_cells;
   }
 
   fn format_cell(&self, val: char, is_problematic: bool) -> String {
