@@ -3,20 +3,6 @@ use std::error::Error;
 use csv::ReaderBuilder;
 use std::path::PathBuf;
 
-pub fn game_from_sample_board(board_type: &str, board_num : &str) -> Game {
-  let board = match read_game(board_type, board_num) {
-    Ok(b) => b,
-    Err(e) => {
-      eprintln!("Failed to read board {} {}: {}", board_type, board_num, e);
-      std::process::exit(1)
-    }
-  };
-
-  return Game {
-    board
-  }
-}
-
 fn read_game(board_type: &str, board_num: &str) -> Result<[[char;9];9], Box<dyn Error>> {
   let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
   path.push("src");
@@ -64,4 +50,18 @@ fn read_game(board_type: &str, board_num: &str) -> Result<[[char;9];9], Box<dyn 
   }
 
   Ok(board)
+}
+
+pub fn game_from_sample_board(board_type: &str, board_num : &str) -> Game {
+  let board = match read_game(board_type, board_num) {
+    Ok(b) => b,
+    Err(e) => {
+      eprintln!("Failed to read board {} {}: {}", board_type, board_num, e);
+      std::process::exit(1)
+    }
+  };
+
+  return Game {
+    board
+  }
 }
