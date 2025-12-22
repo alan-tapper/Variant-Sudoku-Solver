@@ -2,6 +2,7 @@ pub mod standard;
 pub mod antidiagonal;
 pub mod antiking;
 pub mod antiknight;
+pub mod common;
 
 use strum::{EnumCount};
 use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
