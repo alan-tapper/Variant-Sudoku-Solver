@@ -1,10 +1,11 @@
 use crate::game::Game;
+use crate::variants;
 use crate::variants::Variant;
 use std::error::Error;
 use csv::ReaderBuilder;
 use std::path::PathBuf;
 
-fn read_game_from_csv(board_type: &str, board_num: &str) -> Result<[[char;9];9], Box<dyn Error>> {
+fn read_game_from_csv(board_type: &str, board_num: &str) -> Result<Game, Box<dyn Error>> {
   let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
   path.push("src");
   path.push("sample_boards");
@@ -47,53 +48,39 @@ fn read_game_from_csv(board_type: &str, board_num: &str) -> Result<[[char;9];9],
       panic!("invalid variant: {}", vstr);
     }
   }
-  let mut variants_used_string = "".to_string();
-  for vu in variants_used {
-    if variants_used_string.len() == 0 {
-      variants_used_string = vu.alias.to_string();
-    } else {
-      variants_used_string = format!("{}, {}", variants_used_string, vu.alias);
+  let variants_used_string = variants_used.iter()
+    .map(|vu| vu.alias)
+    .collect::<Vec<_>>()
+    .join(", ");
+   println!("{}", variants_used_string);
+   
+   let mut board: [[char; 9]; 9] = [[' '; 9]; 9];
+   let mut game = Game { board };
+   let mut row_count: usize = 0;
+ 
+  //parse and render board given the variant(s)
+  variants::standard::parsing::apply(&mut records, &mut game)?;
+
+  // run variant-specific post-processing (if any)
+  for v in &variants_used {
+    match v.identifier {
+      crate::variants::VariantIdentifier::STANDARD => { /* nothing to do */ }
+      crate::variants::VariantIdentifier::ANTIKNIGHT => {
+        variants::antiknight::parsing::apply(&mut records, &mut game)?;
+      }
+      crate::variants::VariantIdentifier::ANTIKING => {
+        variants::antiking::parsing::apply(&mut records, &mut game)?;
+      }
+      crate::variants::VariantIdentifier::ANTIDIAGONAL => {
+        variants::antidiagonal::parsing::apply(&mut records, &mut game)?;
+      }
     }
   }
-  println!("{}", variants_used_string);
-  
-  let mut board: [[char; 9]; 9] = [[' '; 9]; 9];
-  let mut row_count: usize = 0;
-
-  for i in 0..9 {
-    let record = records.next().unwrap().1?;
-
-      if record.len() != 9 {
-          return Err(format!("expected 9 columns in row {}, got {}", i + 1, record.len()).into());
-      }
-
-      for j in 0..9 {
-          let cell = record.get(j).unwrap().trim();
-          board[i][j] = match cell {
-              "_" | "" => Game::EMPTY_DIGIT,
-              d if d.len() == 1 => {
-                  let ch = d.chars().next().unwrap();
-                  if Game::DIGITS.contains(&ch) {
-                      ch
-                  } else {
-                      return Err(format!("invalid digit '{}' at row {}, col {}", ch, i + 1, j + 1).into());
-                  }
-              }
-              other => return Err(format!("invalid cell '{}' at row {}, col {}", other, i + 1, j + 1).into()),
-          };
-      }
-      row_count += 1;
-  }
-
-  if row_count != 9 {
-      return Err(format!("expected 9 rows, got {}", row_count).into());
-  }
-
-  Ok(board)
+  Ok(game)
 }
 
 pub fn game_from_sample_board(board_type: &str, board_num : &str) -> Game {
-  let board = match read_game_from_csv(board_type, board_num) {
+  let game = match read_game_from_csv(board_type, board_num) {
     Ok(b) => b,
     Err(e) => {
       eprintln!("Failed to read board {} {}: {}", board_type, board_num, e);
@@ -101,7 +88,5 @@ pub fn game_from_sample_board(board_type: &str, board_num : &str) -> Game {
     }
   };
 
-  return Game {
-    board
-  }
+  return game;
 }
