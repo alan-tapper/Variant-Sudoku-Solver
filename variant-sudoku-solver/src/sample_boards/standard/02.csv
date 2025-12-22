@@ -1,3 +1,16 @@
+#TITLE
+Random puzzle from online (with an invalid digit placed)
+
+#AUTHOR
+sudoku.com
+
+#DIFFICULTY
+Easy
+
+#VARIANT(S)
+Standard
+
+#BOARD
 5,5,_,6,_,1,_,_,_
 _,3,_,_,7,5,_,4,9
 _,_,_,9,4,8,_,_,_

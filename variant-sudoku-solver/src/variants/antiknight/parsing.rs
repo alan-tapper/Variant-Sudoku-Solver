@@ -4,7 +4,7 @@ use std::iter::Enumerate;
 use std::fs::File;
 use csv::StringRecordsIter;
 
-pub fn apply(records: &mut Enumerate<StringRecordsIter<'_, File>>, game: &mut Game) -> Result<(), Box<dyn Error + 'static>> {
-  // TODO: implement variant-specific transformations
+pub fn parse(_records: &mut Enumerate<StringRecordsIter<'_, File>>, _game: &Game) -> Result<(), Box<dyn Error + 'static>> {
+  // No parsing needed for antiknight
   Ok(())
 }

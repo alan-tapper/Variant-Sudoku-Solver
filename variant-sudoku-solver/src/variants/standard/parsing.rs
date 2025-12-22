@@ -4,7 +4,7 @@ use std::iter::Enumerate;
 use std::fs::File;
 use csv::StringRecordsIter;
 
-pub fn apply(records: &mut Enumerate<StringRecordsIter<'_, File>>, game: &mut Game) -> Result<(), Box<dyn Error + 'static>> {
+pub fn parse(records: &mut Enumerate<StringRecordsIter<'_, File>>, game: &mut Game) -> Result<(), Box<dyn Error + 'static>> {
     let mut row_count: usize = 0;
     for i in 0..9 {
         let record = records.next().unwrap().1?;

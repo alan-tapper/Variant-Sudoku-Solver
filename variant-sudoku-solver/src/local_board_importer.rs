@@ -1,5 +1,5 @@
 use crate::game::Game;
-use crate::variants;
+use crate::variants::{self, VariantIdentifier};
 use crate::variants::Variant;
 use std::error::Error;
 use csv::ReaderBuilder;
@@ -33,15 +33,16 @@ fn read_game_from_csv(board_type: &str, board_num: &str) -> Result<Game, Box<dyn
   println!("{}", difficulty.as_slice());
 
   //parse and render variants/board type
-  let variants_record = records.next().unwrap().1?;
+  let variants_record: csv::StringRecord = records.next().unwrap().1?;
   let variants_strings: Vec<&str> = variants_record.iter().collect();
   let mut variants_used: Vec<Variant> = Vec::new();
   for vstr in variants_strings {
-    let mut found = false;
+    let mut found: bool = false;
     for av in Variant::ALLOWED_VARIANTS {
-      if vstr.trim() == av.alias {
-        variants_used.push(av);
+      if vstr.trim().eq_ignore_ascii_case(av.alias) {
+        variants_used.push(av.clone());
         found = true;
+        break;
       }
     }
     if found == false {
@@ -52,29 +53,20 @@ fn read_game_from_csv(board_type: &str, board_num: &str) -> Result<Game, Box<dyn
     .map(|vu| vu.alias)
     .collect::<Vec<_>>()
     .join(", ");
-   println!("{}", variants_used_string);
-   
-   let mut board: [[char; 9]; 9] = [[' '; 9]; 9];
-   let mut game = Game { board };
-   let mut row_count: usize = 0;
- 
-  //parse and render board given the variant(s)
-  variants::standard::parsing::apply(&mut records, &mut game)?;
+  println!("{}", variants_used_string);
+  
+  //add standard rules (unless already specified)
+  if !variants_used.iter().any(|v| v.identifier == VariantIdentifier::STANDARD) {
+    variants_used.push(Variant::from_alias("standard").unwrap().clone());
+  }
 
-  // run variant-specific post-processing (if any)
-  for v in &variants_used {
-    match v.identifier {
-      crate::variants::VariantIdentifier::STANDARD => { /* nothing to do */ }
-      crate::variants::VariantIdentifier::ANTIKNIGHT => {
-        variants::antiknight::parsing::apply(&mut records, &mut game)?;
-      }
-      crate::variants::VariantIdentifier::ANTIKING => {
-        variants::antiking::parsing::apply(&mut records, &mut game)?;
-      }
-      crate::variants::VariantIdentifier::ANTIDIAGONAL => {
-        variants::antidiagonal::parsing::apply(&mut records, &mut game)?;
-      }
-    }
+  let board: [[char; 9]; 9] = [[' '; 9]; 9];
+  let mut game = Game { board, variants_used };
+
+  // apply any variant-specific parsing (iterate a cloned snapshot so we don't hold an immutable borrow into `game`)
+  let variants_snapshot = game.variants_used.clone();
+  for v in &variants_snapshot {
+    variants::apply_additional_parsing(v, &mut records, &mut game)?;
   }
   Ok(game)
 }
