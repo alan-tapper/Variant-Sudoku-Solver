@@ -38,7 +38,7 @@ fn read_game_from_csv(board_type: &str, board_num: &str) -> Result<[[char;9];9],
   for vstr in variants_strings {
     let mut found = false;
     for av in Variant::ALLOWED_VARIANTS {
-      if vstr == av.alias {
+      if vstr.trim() == av.alias {
         variants_used.push(av);
         found = true;
       }
@@ -47,7 +47,15 @@ fn read_game_from_csv(board_type: &str, board_num: &str) -> Result<[[char;9];9],
       panic!("invalid variant: {}", vstr);
     }
   }
-  println!("{:?}", variants_used);
+  let mut variants_used_string = "".to_string();
+  for vu in variants_used {
+    if variants_used_string.len() == 0 {
+      variants_used_string = vu.alias.to_string();
+    } else {
+      variants_used_string = format!("{}, {}", variants_used_string, vu.alias);
+    }
+  }
+  println!("{}", variants_used_string);
   
   let mut board: [[char; 9]; 9] = [[' '; 9]; 9];
   let mut row_count: usize = 0;
