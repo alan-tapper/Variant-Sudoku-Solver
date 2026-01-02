@@ -5,9 +5,8 @@ use super::super::common::utils;
 pub fn validate(game: &Game, _in_progress: bool) -> status::Status {
   println!("Validating anti-knight criteria");
 
-  //8 directions to check for:
+  //4 directions to check for:
   // up-left-left, up-up-left, up-up-right, up-right-right
-  // down-left-left, down-down-left, down-down-right, down-right-right
 
   let mut knight_move_cells: Vec<Vec<(usize, usize)>> = Vec::new();
 
