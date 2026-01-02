@@ -55,7 +55,7 @@ fn validate_row(game: &Game, i: usize) -> status::Status {
   for j in 0..9 {
     row.push((i, j));
   }
-  statuses.push(utils::check_for_duplicates(game, &row, &format!("row {}", i)));
+  statuses.push(utils::check_for_duplicates_in_set(game, &row, &format!("row {}", i)));
   return status::combine_statuses(statuses);
 }
 
@@ -65,7 +65,7 @@ fn validate_column(game: &Game, j: usize) -> status::Status {
   for i in 0..9 {
     col.push((i, j));
   }
-  statuses.push(utils::check_for_duplicates(game, &col, &format!("column {}", j)));
+  statuses.push(utils::check_for_duplicates_in_set(game, &col, &format!("column {}", j)));
   return status::combine_statuses(statuses);
 }
 
@@ -83,6 +83,6 @@ fn validate_box(game: &Game, box_i: usize, box_j: usize) -> status::Status {
       }
     }
   }
-  statuses.push(utils::check_for_duplicates(game, &board_box, &format!("box ({}, {})", box_i, box_j)));
+  statuses.push(utils::check_for_duplicates_in_set(game, &board_box, &format!("box ({}, {})", box_i, box_j)));
   return status::combine_statuses(statuses);
 }
