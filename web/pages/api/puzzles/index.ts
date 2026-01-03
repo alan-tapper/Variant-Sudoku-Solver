@@ -1,9 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-const puzzles = [
+// Proxy to backend if BACKEND_API_URL is set, otherwise return mock data
+const MOCK_PUZZLES = [
   {
     id: 'b0d10a03-6a08-41e6-957a-45872d4d0a4b',
-    name: 'Example Standard Puzzle',
+    name: 'MOCK Example Standard Puzzle',
     author: 'seed',
     variant: 'standard',
     difficulty: 3,
@@ -11,6 +12,18 @@ const puzzles = [
   }
 ]
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  res.status(200).json(puzzles)
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const backend = process.env.BACKEND_API_URL
+  if (backend) {
+    try {
+      const r = await fetch(`${backend}/puzzles`)
+      const data = await r.json()
+      return res.status(r.status).json(data)
+    } catch (e: any) {
+      console.error('backend proxy error', e)
+      return res.status(502).json({ error: 'Failed to proxy to backend' })
+    }
+  }
+
+  return res.status(200).json(MOCK_PUZZLES)
 }

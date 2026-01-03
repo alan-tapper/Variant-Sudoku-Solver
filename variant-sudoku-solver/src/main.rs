@@ -16,6 +16,8 @@ use models::puzzle::Puzzle;
 use uuid::Uuid;
 use dotenv::dotenv;
 use std::sync::Arc;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use tower_http::trace::TraceLayer;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -39,6 +41,11 @@ async fn main() -> anyhow::Result<()> {
 
     // Server mode
     if args.get(1).map(|s| s.as_str()) == Some("serve") {
+
+        tracing_subscriber::registry()
+          .with(tracing_subscriber::fmt::layer())
+          .init();
+
         // For dev: permissive CORS (allow all origins/methods). Tighten in production.
         let _cors = CorsLayer::permissive();
 
@@ -47,6 +54,7 @@ async fn main() -> anyhow::Result<()> {
         let app = Router::new()
             .route("/puzzles", get(get_puzzles))
             .route("/puzzles/{id}", get(get_puzzle))
+            .layer(TraceLayer::new_for_http())
             // .layer(cors)
             .with_state(shared_pool.clone());
 

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-const puzzles = [
+const MOCK_PUZZLES = [
   {
     id: 'b0d10a03-6a08-41e6-957a-45872d4d0a4b',
     name: 'Example Standard Puzzle',
@@ -11,12 +11,24 @@ const puzzles = [
   }
 ]
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const {
     query: { id },
   } = req
 
-  const p = puzzles.find((x) => x.id === id)
+  const backend = process.env.BACKEND_API_URL
+  if (backend) {
+    try {
+      const r = await fetch(`${backend.replace(/\/$/, '')}/puzzles/${id}`)
+      const data = await r.json()
+      return res.status(r.status).json(data)
+    } catch (e: any) {
+      console.error('backend proxy error', e)
+      return res.status(502).json({ error: 'Failed to proxy to backend' })
+    }
+  }
+
+  const p = MOCK_PUZZLES.find((x) => x.id === id)
   if (!p) return res.status(404).end()
   res.status(200).json(p)
 }
