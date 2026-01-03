@@ -1,4 +1,3 @@
 variant-sudoku-solver/target/
 .vscode/
 .env
-web/.env.local
