@@ -9,3 +9,21 @@ csv = "1.4.0"
 regex = "1.12.2"
 strum = "0.27.2"
 strum_macros = "0.27.2"
+
+# Database and serialization
+sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-rustls", "macros", "uuid", "chrono"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1", features = ["serde", "v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+anyhow = "1.0"
+
+# Web server
+axum = "0.8"
+tower-http = { version = "0.3", features = ["trace", "cors"] }
+tracing-subscriber = "0.3"
+hyper = { version = "0.14", features = ["server"] }
+
+# Environment file loader for local dev
+dotenv = "0.15"

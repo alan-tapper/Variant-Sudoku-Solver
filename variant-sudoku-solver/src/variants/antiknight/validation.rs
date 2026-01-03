@@ -29,7 +29,7 @@ pub fn validate(game: &Game, _in_progress: bool) -> status::Status {
 
   let mut statuses: Vec<Status> = Vec::new();
   for adj in knight_move_cells.iter() {
-    let status = utils::check_for_duplicates_in_set(game, adj, "knight move cells");
+    let status = utils::check_for_duplicates_in_set(game, adj, "knight move");
     if status.0 == false {
       statuses.push(status);
     }

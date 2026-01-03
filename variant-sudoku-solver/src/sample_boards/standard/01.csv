@@ -8,7 +8,7 @@ sudoku.com
 Easy
 
 #VARIANT(S)
-Standard
+Standard,Anti-Knight,Anti-King,Anti-Diagonal
 
 #BOARD
 5,4,9,6,3,1,8,2,7
