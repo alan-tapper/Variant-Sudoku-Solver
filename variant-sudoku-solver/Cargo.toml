@@ -11,7 +11,7 @@ strum = "0.27.2"
 strum_macros = "0.27.2"
 
 # Database and serialization
-sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-rustls", "macros", "uuid", "chrono"] }
+sqlx = { version = "0.8.6", features = ["postgres", "runtime-tokio-rustls", "macros", "uuid", "chrono"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -23,7 +23,7 @@ anyhow = "1.0"
 axum = "0.8"
 tower-http = { version = "0.6.8", features = ["trace", "cors"] }
 tracing-subscriber = "0.3"
-hyper = { version = "0.14", features = ["server"] }
+hyper = { version = "1.8.1", features = ["server"] }
 
 # Environment file loader for local dev
 dotenv = "0.15"
